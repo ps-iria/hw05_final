@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Последние обновления на сайте{% endblock %}
-{% block header %}Последние обновления на сайте{% endblock %}
+{% block title %}Cписок статей авторов на которых подписаны{% endblock %}
+{% block header %}Cписок статей авторов на которых подписаны{% endblock %}
 {% block content %}
   {% load thumbnail %}
 <div class="container">
-  {% include "menu.html" with index=True %}
+  {% include "menu.html" with follow=True %}
   {% for post in page %}
   {% include "post_item.html" with post=post %}
   {% endfor %}
