@@ -4,6 +4,7 @@
 {% block content %}
   {% load thumbnail %}
 <div class="container">
+  {% include "menu.html" with index=True %}
   {% for post in page %}
 <!--    <div class="card mb-3 w-100" >-->
 <!--      <div class="row no-gutters">-->

@@ -203,3 +203,20 @@ def add_comment(request, username, post_id):
         return render(request, 'comments.html', {'form': form, 'post': post_object})
     form = CommentForm()
     return render(request, 'comments.html', {'form': form, 'post': post_object})
+
+@login_required
+def follow_index(request):
+    # информация о текущем пользователе доступна в переменной request.user
+    # ...
+    return render(request, "follow.html", {...})
+
+@login_required
+def profile_follow(request, username):
+    # ...
+    pass
+
+
+@login_required
+def profile_unfollow(request, username):
+    # ...
+    pass

@@ -223,6 +223,7 @@ class ModelsTest(TestCase):
 
     def test_image_in_post(self):
         """"""
+        cache.clear()
         with open('media/posts/winter.jpg', 'rb') as img:
             self.client.post(
                 self.POST_EDIT,
