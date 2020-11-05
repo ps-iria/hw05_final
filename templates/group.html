@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Записи сообщества {{group}}{% endblock %}
+{% block header %}{{group}}{% endblock %}
+{% block content %}
+    {% load thumbnail %}
+  <p>{{group.description}}</p>
+  {% for post in page %}
+<!--    <div class="card mb-3 w-100" >-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-3 p-2 ">-->
+<!--          {% thumbnail post.image "500x500" crop="center" upscale=True as im %}-->
+<!--            <img  class="card-img rounded" src="{{ im.url }}">-->
+<!--          {% endthumbnail %}-->
+<!--        </div>-->
+<!--        <div class="col-md-9 ">-->
+<!--          <div class="card-body">-->
+<!--            <p class="card-text">{{ post.text|linebreaksbr }}</p>-->
+<!--            <p class="card-text float-none">-->
+<!--              <small class="text-muted">Автор:-->
+<!--                {% if post.author.get_full_name %}-->
+<!--                  {{ post.author.get_full_name }}-->
+<!--                {% else %}-->
+<!--                  {{ post.author.username }}-->
+<!--                {% endif %}-->
+<!--              </small>-->
+<!--            </p>-->
+<!--            <p class="card-text float-left">-->
+<!--              <small class="text-muted">Дата публикации:-->
+<!--                <a href="{% url 'post_detail' post.author.username post.pk  %}">-->
+<!--                  {{ post.pub_date|date:"d M Y" }}-->
+<!--                </a>-->
+<!--              </small>-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+{% include "post_item.html" with post=post %}
+  {% endfor %}
+  {% if page.has_other_pages %}
+    {% include 'pagination.html' %}
+  {% endif %}
+{% endblock %}

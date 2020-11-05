@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}News blog{% endblock %} | Yatube</title>
+  <!-- Загрузка статики -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
+  <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+  <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+</head>
+
+<body>
+
+  <main>
+    <div class="container">
+      {% include 'nav.html' %}
+      <h1>{% block header %}The Last Social Media You'll Ever Need{% endblock %}</h1>
+      <div class="row">
+        <div class="col-md-3">
+          {% block left %}
+            {% if user.is_authenticated %}
+              <p>Привет, {{ user.username }}!</p>
+              <a class="p-2 text-dark" href="{% url 'password_change' %}">Изменить пароль</a>
+            {% endif %}
+          {% endblock %}
+        </div>
+        <div class="col-md-9">
+          {% block content %}
+          {% endblock %}
+        </div>
+      </div>
+      {% include 'footer.html' %}
+    </div>
+  </main>
+
+</body>
+
+</html>
