@@ -177,12 +177,12 @@ class ModelsTest(TestCase):
                 'group': self.group2.id,
             }, follow=True
         )
+
         self.assertEqual(
             response.status_code,
             200,
             msg='Сервер вернул неожиданный ответ'
         )
-
         self.post.refresh_from_db()
         post = response.context['post']
         self.post_atribute_equal(
