@@ -1,4 +1,4 @@
-from django.core.cache import cache, caches
+from django.core.cache import cache
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -157,7 +157,6 @@ class ModelsTest(TestCase):
             },
             follow=False
         )
-
         self.assertEqual(
             response.status_code,
             302,
@@ -243,7 +242,6 @@ class ModelsTest(TestCase):
                 }
             )
             response = self.client.get(self.POST_DETAIL)
-            # print(response.content)
             self.assertNotContains(
                 response,
                 '<img class="card-img"',
@@ -269,7 +267,6 @@ class ModelsTest(TestCase):
                 with self.subTest(url=url, msg=f'Запись не найдена'
                                                f' на странице'):
                     response = self.client.get(url)
-                    # print(response.content)
                     self.assertContains(
                         response,
                         '<img class="card-img"',

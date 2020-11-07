@@ -5,7 +5,6 @@
 {% block content %}
     {% load thumbnail %}
   <main role="main" class="container">
-
   <div class="row">
   {% include 'base_profile.html' with author=author %}
     <div class="col-md-9">
@@ -14,9 +13,7 @@
       {% endfor %}
     </div>
   </div>
-
   </main>
-
   {% if page.has_other_pages %}
     {% include 'pagination.html' %}
   {% endif %}

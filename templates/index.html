@@ -7,12 +7,8 @@
     <div class="col-md-12">
       {% include "menu.html" with index=True %}
       {% for post in page %}
-        {#{% load cache %}#}
-        {#{% cache 500 sidebar %}#}
         {% include "post_item.html" with post=post %}
-        {#{% endcache %}#}
       {% endfor %}
-
       {% if page.has_other_pages %}
         {% include 'pagination.html' %}
       {% endif %}

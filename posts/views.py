@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import InvalidPage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.cache import cache_page
 
@@ -134,8 +133,6 @@ def create_post(request):
 
 
 def page_not_found(request, exception):
-    # Переменная exception содержит отладочную информацию,
-    # выводить её в шаблон пользователской страницы 404 мы не станем
     return render(
         request,
         "misc/404.html",
@@ -156,34 +153,37 @@ def server_error(request):
 
 @login_required
 def add_comment(request, username, post_id):
-    """Display a form for adding a comment."""
-    # get post to which comment is to be added
-    # return 404 if User with username does not exist, if Post with
-    # post_id does not exist or if username is not the author of the Post.
     post_object = get_object_or_404(Post, id=post_id,
                                     author__username=username)
-
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
-            # if form is valid, populate missing data and save a post
-            # all validation is done at the model level
             comment = form.save(commit=False)
             comment.post = post_object
             comment.author = request.user
             comment.save()
             return redirect('post_detail', username=username, post_id=post_id)
-        return render(request, 'comments.html',
-                      {'form': form, 'post': post_object})
+        return render(
+            request,
+            'comments.html',
+            {
+                'form': form,
+                'post': post_object
+            }
+        )
     form = CommentForm()
-    return render(request, 'comments.html',
-                  {'form': form, 'post': post_object})
+    return render(
+        request,
+        'comments.html',
+        {
+            'form': form,
+            'post': post_object
+        }
+    )
 
 
-# @cache_page(20)
 @login_required
 def follow_index(request):
-    # информация о текущем пользователе доступна в переменной request.user
     post_list = Post.objects.filter(author__following__user=request.user)
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -243,11 +243,11 @@ def comment_edit(request, username, post_id, comment_id):
             }
         )
     comment = form.save(commit=False)
-    # comment.text = 'sdsds'
     comment.save()
     return redirect('post_detail', username=username, post_id=post_id)
 
 
+@login_required
 def comment_delete(request, username, post_id, comment_id):
     author = get_object_or_404(User, username=request.user)
     post = get_object_or_404(Post, pk=post_id)

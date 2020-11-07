@@ -4,7 +4,6 @@ from .models import Post, Group, Follow
 
 
 class PostAdmin(admin.ModelAdmin):
-
     list_display = (
         'pk',
         'text',
