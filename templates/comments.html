@@ -3,39 +3,51 @@
 <div class="col col-md-12">
     <!-- Форма добавления комментария -->
 
-{% if user.is_authenticated %}
-    <div class="card my-4">
-        <form
-            action="{% url 'add_comment' post.author.username post.id %}"
-            method="post">
-            {% csrf_token %}
-            <h5 class="card-header">Добавить комментарий:</h5>
-            <div class="card-body">
-                <form>
-                    <div class="form-group">
-                        {{ form.text|addclass:"form-control" }}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Отправить</button>
-                </form>
-            </div>
-        </form>
-    </div>
-{% endif %}
+  {% if user.is_authenticated %}
+      <div class="card my-4">
+          <form
+              action="{% if comment %}{% url 'comment_edit' post.author.username post.id comment.id %}{% else %}{% url 'add_comment' post.author.username post.id %}{% endif %}"
+              method="post">
+              {% csrf_token %}
+              <h5 class="card-header">{% if comment %}Сохранить{% else %}Добавить{% endif %} комментарий:</h5>
+              <div class="card-body">
+                  <form>
+                      <div class="form-group">
+                          {{ form.text|addclass:"form-control" }}
+                      </div>
+                      <button type="submit" class="btn btn-primary">{% if comment %}Сохранить{% else %}Отправить{% endif %}</button>
+                  </form>
+              </div>
+          </form>
+      </div>
+  {% endif %}
 
-<!-- Комментарии -->
-{% for item in comments %}
-    <div class="media mb-4">
-        <div class="media-body">
-            <h5 class="mt-0">
-                <a
-                    href="{% url 'profile' item.author.username %}"
-                    name="comment_{{ item.id }}"
-                    >@{{ item.author.username }}
-                </a>
-                {{ item.created }}
-            </h5>
-            {{ item.text }}
+  <!-- Комментарии -->
+  {% for item in comments %}
+      <div class="media mb-4">
+          <div class="media-body">
+              <h5 class="mt-0">
+                  <a
+                      href="{% url 'profile' item.author.username %}"
+                      name="comment_{{ item.id }}"
+                      >@{{ item.author.username }}
+                  </a>
+                  {{ item.created }}
+              </h5>
+              {{ item.text }}
+          </div>
+        {% if item.author == user %}
+        <div class="text-right">
+          <a href="{% url 'comment_edit' post.author.username post.id item.id   %}"
+             name="comment_{{ item.id }}">редактировать
+          </a>
+          <br>
+          <a href="{% url 'comment_delete' post.author.username post.id item.id   %}"
+             name="comment_{{ item.id }}">Удалить
+          </a>
         </div>
-    </div>
-    {% endfor %}
+        {% endif %}
+      </div>
+    <hr>
+  {% endfor %}
 </div>

@@ -2,7 +2,7 @@ from django.core.cache import cache, caches
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from posts.models import Post, Group, User
+from posts.models import Post, Group, User, Follow, Comment
 
 
 class ModelsTest(TestCase):
@@ -12,6 +12,11 @@ class ModelsTest(TestCase):
         self.user = User.objects.create_user(
             username="User11",
             email="User@11.11",
+            password="qwe",
+        )
+        self.user2 = User.objects.create_user(
+            username="User22",
+            email="User@22.22",
             password="qwe",
         )
         self.group = Group.objects.create(
@@ -46,11 +51,32 @@ class ModelsTest(TestCase):
             'profile',
             args=[self.user.username]
         )
+        self.PROFILE2 = reverse(
+            'profile',
+            args=[self.user2.username]
+        )
         self.POST_EDIT = reverse(
             'post_edit',
             args=[self.user.username,
                   self.post.id]
         )
+        self.FOLLOWER = reverse(
+            'profile_follow',
+            args=[self.user.username]
+        )
+        self.FOLLOWER2 = reverse(
+            'profile_follow',
+            args=[self.user2.username]
+        )
+        self.FOLLOW = reverse(
+            'follow_index',
+        )
+        self.COMMENT = reverse(
+            'add_comment',
+            args=[self.user.username,
+                  self.post.id]
+        )
+
         self.URLS = (
             self.INDEX,
             self.PROFILE,
@@ -204,6 +230,9 @@ class ModelsTest(TestCase):
         )
 
     def test_non_image_upload(self):
+        """
+        Тест проверяющий загрузку изображения
+        """
         with open('media/posts/new.txt', 'rb') as img:
             post = self.client.post(
                 self.POST_EDIT,
@@ -222,7 +251,9 @@ class ModelsTest(TestCase):
             )
 
     def test_image_in_post(self):
-        """"""
+        """
+        Тест проверяющий что загруженный файл является изображением
+        """
         cache.clear()
         with open('media/posts/winter.jpg', 'rb') as img:
             self.client.post(
@@ -245,6 +276,9 @@ class ModelsTest(TestCase):
                     )
 
     def test_cache(self):
+        """
+        Тест, который проверяет работу кэша
+        """
         post_count = Post.objects.count()
         self.client.get(self.INDEX)
         response = self.client.post(
@@ -269,4 +303,102 @@ class ModelsTest(TestCase):
             index.context['page'][0].text,
             'new',
             msg='Пост не появился после очитски кэша'
+        )
+
+    def test_follow_unfollow(self):
+        """
+        Авторизованный пользователь может подписываться на других пользователей
+        и удалять их из подписок.
+        """
+
+        response = self.client.get(self.PROFILE2)
+        self.assertContains(
+            response,
+            'role="button">Подписаться</a>',
+            msg_prefix='На странице нет кнопки "Подписаться"')
+        response = self.client.get(
+            self.FOLLOWER2,
+            follow=True
+        )
+        self.assertContains(
+            response,
+            'role="button">Отписаться</a>',
+            msg_prefix='На странице нет кнопки "Отписаться"')
+        self.assertTrue(
+            Follow.objects.filter(user=self.user,
+                                  author=self.user2).exists(),
+            "Запись не добавленна в базу")
+
+    def test_follow_posts(self):
+        """
+        Новая запись пользователя появляется в ленте тех, кто на него подписан
+        и не появляется в ленте тех, кто не подписан на него.
+        """
+        self.client.get(
+            self.FOLLOWER2,
+            follow=True
+        )
+        post2 = Post.objects.create(
+            text="Test user2 post",
+            author=self.user2,
+            group=self.group2,
+        )
+        post3 = Post.objects.create(
+            text="Test user post",
+            author=self.user,
+            group=self.group2,
+        )
+        response = self.client.get(self.FOLLOW)
+        self.assertIn(
+            post2, response.context['page'],
+            "Посты из подписок не появляются в ленте Избранных")
+        self.assertNotIn(
+            post3, response.context['page'],
+            "Посты не из подписок появляются в ленте Избранных")
+
+    def test_anonym_comment(self):
+        """
+        Неавторизированный пользователь не может комментировать посты.
+        """
+        response = self.anonym.post(
+            self.COMMENT,
+            {
+                'text': 'test comment'
+            },
+            follow=True
+        )
+        self.assertFalse(
+            Comment.objects.filter(post=self.post,
+                                   text='test comment').exists(),
+            'Комментарий добавился в базу')
+        self.assertRedirects(
+            response,
+            f'/auth/login/?next={self.COMMENT}',
+            msg_prefix='Анонимный пользователь не перенаправлен '
+                       'на страницу логина')
+
+    def test_user_comment(self):
+        """
+        Авторизированный пользователь может комментировать посты.
+        """
+        response = self.client.post(
+            self.COMMENT,
+            {
+                'text': 'test comment'
+            },
+            follow=True
+        )
+        self.assertTrue(
+            Comment.objects.filter(post=self.post,
+                                   text='test comment').exists(),
+            'Комментарий не добавился в базу')
+        self.assertRedirects(
+            response,
+            self.POST_DETAIL,
+            msg_prefix='После комментария пользователь не перенаправлен'
+                       'на страницу поста')
+        self.assertEqual(
+            response.context['comments'][0].text,
+            'test comment',
+            'Комментарий не найден на странице'
         )

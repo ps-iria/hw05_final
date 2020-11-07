@@ -14,19 +14,22 @@
         </li>
       {% endif %}
     </ul>
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        {% if not user.is_authenticated %}
+    <ul class="navbar-nav ml-auto float-right">
+      {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'password_change' %}">Изменить пароль</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Выйти</a>
+        </li>
+      {% else %}
+        <li class="nav-item">
           <a class="nav-link" href="{% url 'signup' %}"><span class="glyphicon glyphicon-user"></span>Регистрация</a>
-        {% endif %}
-      </li>
-      <li class="nav-item">
-        {% if user.is_authenticated %}
-          <a class="nav-link" href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-in"></span> Выйти</a>
-        {% else %}
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Войти</a>
-        {% endif %}
-      </li>
+        </li>
+      {% endif %}
     </ul>
   </div>
 </nav>

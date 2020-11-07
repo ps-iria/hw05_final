@@ -3,57 +3,19 @@
 {% block header %}Последние обновления на сайте{% endblock %}
 {% block content %}
   {% load thumbnail %}
-<div class="container">
-  {% include "menu.html" with index=True %}
-  {% for post in page %}
-<!--    <div class="card mb-3 w-100" >-->
-<!--      <div class="row no-gutters">-->
-<!--        <div class="col-md-3 p-2 ">-->
-<!--          {% thumbnail post.image "500x500" crop="center" upscale=True as im %}-->
-<!--            <img  class="card-img rounded" src="{{ im.url }}">-->
-<!--          {% endthumbnail %}-->
-<!--        </div>-->
-<!--        <div class="col-md-9 ">-->
-<!--          <div class="card-body">-->
-<!--            <p class="card-text">{{ post.text|linebreaksbr }}</p>-->
-<!--            <p class="card-text float-none">-->
-<!--              <small class="text-muted">Автор:-->
-<!--                <a href="{% url 'profile' post.author.username %}">-->
-<!--                  {% if post.author.get_full_name %}-->
-<!--                    {{ post.author.get_full_name }}-->
-<!--                  {% else %}-->
-<!--                    {{ post.author.username }}-->
-<!--                  {% endif %}-->
-<!--                </a>-->
-<!--              </small>-->
-<!--            </p>-->
-<!--            <p class="card-text float-left">-->
-<!--              <small class="text-muted">Дата публикации:-->
-<!--                <a href="{% url 'post_detail' post.author.username post.id %}">-->
-<!--                  {{ post.pub_date|date:"d M Y" }}-->
-<!--                </a>-->
-<!--              </small>-->
-<!--            </p>-->
-<!--            {% if post.group %}-->
-<!--              <p class="card-text float-right">-->
-<!--                <small class="text-muted">Сообщество:-->
-<!--                  <a href="{% url 'group' post.group.slug %}">-->
-<!--                    {{post.group}}-->
-<!--                  </a>-->
-<!--                </small>-->
-<!--              </p>-->
-<!--            {% endif %}-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-{#{% load cache %}#}
-{#{% cache 500 sidebar %}#}
-  {% include "post_item.html" with post=post %}
-{#{% endcache %}#}
-  {% endfor %}
+  <div class="row">
+    <div class="col-md-12">
+      {% include "menu.html" with index=True %}
+      {% for post in page %}
+        {#{% load cache %}#}
+        {#{% cache 500 sidebar %}#}
+        {% include "post_item.html" with post=post %}
+        {#{% endcache %}#}
+      {% endfor %}
+
+      {% if page.has_other_pages %}
+        {% include 'pagination.html' %}
+      {% endif %}
+    </div>
   </div>
-  {% if page.has_other_pages %}
-    {% include 'pagination.html' %}
-  {% endif %}
 {% endblock %}
