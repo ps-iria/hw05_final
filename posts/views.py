@@ -20,7 +20,7 @@ def index(request):
     page = pagination(paginator, page_number)
     return render(
         request,
-        "index.html",
+        "posts/index.html",
         {
             "page": page,
             "paginator": paginator,
@@ -36,7 +36,7 @@ def group_posts(request, slug):
     page = pagination(paginator, page_number)
     return render(
         request,
-        "group.html",
+        "posts/group.html",
         {
             "group": group,
             "page": page,
@@ -55,7 +55,7 @@ def profile(request, username):
         user=request.user, author=author).exists()
     return render(
         request,
-        "profile.html",
+        "posts/profile.html",
         {
             "page": page,
             'paginator': paginator,
@@ -72,7 +72,7 @@ def post_view(request, username, post_id):
     comments = Comment.objects.filter(post=post)[:10]
     return render(
         request,
-        "post_detail.html",
+        "posts/post_detail.html",
         {
             'post': post,
             'author': author,
@@ -92,7 +92,7 @@ def post_edit(request, username, post_id):
     if not form.is_valid():
         return render(
             request,
-            'post_new.html',
+            'posts/post_new.html',
             {
                 'form': form,
                 'post': post
@@ -120,7 +120,7 @@ def create_post(request):
     if not form.is_valid():
         return render(
             request,
-            'post_new.html',
+            'posts/post_new.html',
             {
                 'form': form
             }
@@ -158,7 +158,7 @@ def add_comment(request, username, post_id):
     if not form.is_valid():
         return render(
             request,
-            'comments.html',
+            'posts/comments.html',
             {
                 'form': form,
                 'post': post_object
@@ -179,7 +179,7 @@ def follow_index(request):
     page = pagination(paginator, page_number)
     return render(
         request,
-        "follow.html",
+        "posts/follow.html",
         {
             "page": page,
             "paginator": paginator,
@@ -226,7 +226,7 @@ def comment_edit(request, username, post_id, comment_id):
     if not form.is_valid():
         return render(
             request,
-            'post_detail.html',
+            'posts/post_detail.html',
             {
                 'post': post,
                 'author': post_author,

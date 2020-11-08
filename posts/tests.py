@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -60,12 +61,20 @@ class ModelsTest(TestCase):
             args=[self.user.username,
                   self.post.id]
         )
-        self.FOLLOWER = reverse(
+        self.PROFILE_FOLLOW = reverse(
             'profile_follow',
             args=[self.user.username]
         )
-        self.FOLLOWER2 = reverse(
+        self.PROFILE_UNFOLLOW = reverse(
+            'profile_unfollow',
+            args=[self.user.username]
+        )
+        self.PROFILE_FOLLOW2 = reverse(
             'profile_follow',
+            args=[self.user2.username]
+        )
+        self.PROFILE_UNFOLLOW2 = reverse(
+            'profile_unfollow',
             args=[self.user2.username]
         )
         self.FOLLOW = reverse(
@@ -76,6 +85,11 @@ class ModelsTest(TestCase):
             args=[self.user.username,
                   self.post.id]
         )
+        self.LOGIN = reverse(
+            'login',
+        )
+        self.image = self.create_image()
+        self.file = self.create_file()
 
         self.URLS = (
             self.INDEX,
@@ -101,6 +115,27 @@ class ModelsTest(TestCase):
             test_author,
             msg='Автор поста не соответствует'
         )
+
+    def create_image(self):
+        image = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21'
+            b'\xf9\x04\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00'
+            b'\x01\x00\x00\x02\x02\x4c\x01\x00\x3b')
+        file = SimpleUploadedFile(
+            name='test.jpg',
+            content=image,
+            content_type='image/jpg',
+        )
+        return file
+
+    def create_file(self):
+        file = SimpleUploadedFile(
+            name='test.txt',
+            content=b'text '
+                    b'text',
+            content_type='text/plain'
+        )
+        return file
 
     def test_profile_exist(self):
         """
@@ -232,94 +267,90 @@ class ModelsTest(TestCase):
         """
         Тест проверяющий загрузку изображения
         """
-        with open('media/posts/new.txt', 'rb') as img:
-            post = self.client.post(
-                self.POST_EDIT,
-                {
-                    'author': self.user,
-                    'text': 'post with image',
-                    'image': img
-                }
-            )
-            response = self.client.get(self.POST_DETAIL)
-            self.assertNotContains(
-                response,
-                '<img class="card-img"',
-
-            )
+        response = self.client.post(
+            self.POST_EDIT,
+            {
+                'author': self.user,
+                'text': 'post with image',
+                'group': self.group.id,
+                'image': self.file
+            }
+        )
+        self.assertContains(
+            response,
+            'Загрузите правильное изображение. Файл, который вы загрузили, '
+            'поврежден или не является изображением.',
+        )
 
     def test_image_in_post(self):
         """
         Тест проверяющий что загруженный файл является изображением
         """
         cache.clear()
-        with open('media/posts/winter.jpg', 'rb') as img:
-            self.client.post(
-                self.POST_EDIT,
-                {
-                    'author': self.user,
-                    'text': 'post with image',
-                    'group': self.group.id,
-                    'image': img
-                }
-            )
-            for url in self.URLS:
-                with self.subTest(url=url, msg=f'Запись не найдена'
-                                               f' на странице'):
-                    response = self.client.get(url)
-                    self.assertContains(
-                        response,
-                        '<img class="card-img"',
-                    )
+        self.client.post(
+            self.POST_EDIT,
+            {
+                'author': self.user,
+                'text': 'post with image',
+                'group': self.group.id,
+                'image': self.image
+            }
+        )
+        for url in self.URLS:
+            with self.subTest(url=url, msg=f'Изображение не найдено'
+                                           f' на странице'):
+                response = self.client.get(url)
+                self.assertContains(
+                    response,
+                    '<img',
+                )
 
     def test_cache(self):
         """
         Тест, который проверяет работу кэша
         """
-        post_count = Post.objects.count()
         self.client.get(self.INDEX)
-        response = self.client.post(
-            self.POST_NEW,
-            {
-                'text': 'new',
-                'group': self.group.id,
-            },
-            follow=True
+        post = Post.objects.create(
+            text="new",
+            author=self.user,
+            group=self.group,
         )
-        self.assertEqual(
-            Post.objects.count(),
-            post_count + 1,
-            msg='Пост не добавлен в базу'
+        response = self.client.get(self.INDEX)
+        self.assertNotContains(
+            response,
+            post,
         )
-
-        with self.assertRaises(TypeError):
-            post = response.context['page'][0]
         cache.clear()
         index = self.client.get(self.INDEX)
         self.assertEqual(
-            index.context['page'][0].text,
-            'new',
+            index.context['page'][0],
+            post,
             msg='Пост не появился после очитски кэша'
         )
 
-    def test_follow_unfollow(self):
+    def test_follow(self):
         """
-        Авторизованный пользователь может подписываться на других пользователей
-        и удалять их из подписок.
+        Авторизованный пользователь может подписываться
+        на других пользователей.
         """
-
         response = self.client.get(self.PROFILE2)
         self.assertContains(
             response,
-            'role="button">Подписаться</a>',
+            self.FOLLOW,
             msg_prefix='На странице нет кнопки "Подписаться"')
+
+    def test_unfollow(self):
+        """
+        Авторизованный пользователь может удалять других пользователей
+        из подписок.
+        """
         response = self.client.get(
-            self.FOLLOWER2,
+            self.PROFILE_FOLLOW2,
             follow=True
         )
         self.assertContains(
             response,
-            'role="button">Отписаться</a>',
+            self.PROFILE_UNFOLLOW2,
             msg_prefix='На странице нет кнопки "Отписаться"')
         self.assertTrue(
             Follow.objects.filter(user=self.user,
@@ -331,26 +362,26 @@ class ModelsTest(TestCase):
         Новая запись пользователя появляется в ленте тех, кто на него подписан
         и не появляется в ленте тех, кто не подписан на него.
         """
-        self.client.get(
-            self.FOLLOWER2,
-            follow=True
+        Follow.objects.create(
+            user=self.user,
+            author=self.user2
         )
-        post2 = Post.objects.create(
+        post_user2 = Post.objects.create(
             text="Test user2 post",
             author=self.user2,
             group=self.group2,
         )
-        post3 = Post.objects.create(
+        post_user = Post.objects.create(
             text="Test user post",
             author=self.user,
             group=self.group2,
         )
         response = self.client.get(self.FOLLOW)
         self.assertIn(
-            post2, response.context['page'],
+            post_user2, response.context['page'],
             "Посты из подписок не появляются в ленте Избранных")
         self.assertNotIn(
-            post3, response.context['page'],
+            post_user, response.context['page'],
             "Посты не из подписок появляются в ленте Избранных")
 
     def test_anonym_comment(self):
@@ -370,7 +401,8 @@ class ModelsTest(TestCase):
             'Комментарий добавился в базу')
         self.assertRedirects(
             response,
-            f'/auth/login/?next={self.COMMENT}',
+            # f'/auth/login/?next={self.COMMENT}',
+            '%s?next=%s' % (self.LOGIN, self.COMMENT),
             msg_prefix='Анонимный пользователь не перенаправлен '
                        'на страницу логина')
 
