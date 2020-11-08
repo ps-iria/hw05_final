@@ -5,12 +5,12 @@
   {% load thumbnail %}
   <div class="row">
     <div class="col-md-12">
-      {% include "menu.html" with index=True %}
+      {% include "includes/menu.html" with index=True %}
       {% for post in page %}
-        {% include "posts/post_item.html" with post=post %}
+        {% include "posts/../../../templates/includes/post_item.html" with post=post %}
       {% endfor %}
       {% if page.has_other_pages %}
-        {% include 'pagination.html' %}
+        {% include 'includes/pagination.html' %}
       {% endif %}
     </div>
   </div>

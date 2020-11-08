@@ -4,12 +4,12 @@
 {% block content %}
   {% load thumbnail %}
   <div class="container">
-    {% include "menu.html" with follow=True %}
+    {% include "includes/menu.html" with follow=True %}
     {% for post in page %}
-      {% include "posts/post_item.html" with post=post %}
+      {% include "posts/../../../templates/includes/post_item.html" with post=post %}
     {% endfor %}
   </div>
   {% if page.has_other_pages %}
-    {% include 'pagination.html' %}
+    {% include 'includes/pagination.html' %}
   {% endif %}
 {% endblock %}

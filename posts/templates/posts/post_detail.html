@@ -5,10 +5,10 @@
   {% load thumbnail %}
   <main role="main" class="container">
     <div class="row">
-      {% include 'posts/base_profile.html' with author=author %}
+      {% include 'posts/../../../templates/includes/base_profile.html' with author=author %}
       <div class="col-md-9">
-        {% include "posts/post_item.html" with post=post %}
-        {% include 'posts/comments.html' %}
+        {% include "posts/../../../templates/includes/post_item.html" with post=post %}
+        {% include 'posts/../../../templates/includes/comments.html' %}
       </div>
     </div>
   </main>
