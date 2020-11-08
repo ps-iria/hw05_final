@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import InvalidPage
@@ -97,8 +98,6 @@ def post_edit(request, username, post_id):
                 'post': post
             }
         )
-    post = form.save(commit=False)
-    post.author = request.user
     post.save()
     return redirect('post_detail', username=username, post_id=post_id)
 
@@ -117,7 +116,7 @@ def pagination(paginator, page_number):
 
 @login_required
 def create_post(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(request.POST or None, files=request.FILES or None)
     if not form.is_valid():
         return render(
             request,
@@ -155,14 +154,8 @@ def server_error(request):
 def add_comment(request, username, post_id):
     post_object = get_object_or_404(Post, id=post_id,
                                     author__username=username)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post_object
-            comment.author = request.user
-            comment.save()
-            return redirect('post_detail', username=username, post_id=post_id)
+    form = CommentForm(request.POST or None)
+    if not form.is_valid():
         return render(
             request,
             'comments.html',
@@ -171,15 +164,11 @@ def add_comment(request, username, post_id):
                 'post': post_object
             }
         )
-    form = CommentForm()
-    return render(
-        request,
-        'comments.html',
-        {
-            'form': form,
-            'post': post_object
-        }
-    )
+    comment = form.save(commit=False)
+    comment.post = post_object
+    comment.author = request.user
+    comment.save()
+    return redirect('post_detail', username=username, post_id=post_id)
 
 
 @login_required
@@ -200,13 +189,17 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    follow_object = Follow.objects.filter(author__username=username,
-                                          user=request.user).exists()
+    followed_author = get_object_or_404(User, username=username)
+    is_follow_exists = Follow.objects.filter(author=followed_author,
+                                             user=request.user).exists()
     if request.user.username == username:
+        messages.warning(request, 'Невозможно подписатся на самого себя.')
         return redirect('profile', username=username)
-    if not follow_object:
-        follower = get_object_or_404(User, username=username)
-        follow = Follow.objects.create(user=request.user, author=follower)
+    if not is_follow_exists:
+        follow = Follow.objects.create(
+            user=request.user,
+            author=followed_author
+        )
         follow.save()
     return redirect('profile', username=username)
 
@@ -221,13 +214,13 @@ def profile_unfollow(request, username):
 
 @login_required
 def comment_edit(request, username, post_id, comment_id):
-    author = get_object_or_404(User, username=request.user)
-    if request.user != author:
+    post_author = get_object_or_404(User, username=username)
+    post = get_object_or_404(Post, pk=post_id, author=post_author)
+    comment = get_object_or_404(Comment, pk=comment_id, post=post)
+    if request.user != comment.author:
         return redirect('post_detail', username=username, post_id=post_id)
-    post = get_object_or_404(Post, pk=post_id, author=author)
-    comment = get_object_or_404(Comment, pk=comment_id, post=post,
-                                author=author)
-    comments = Comment.objects.filter(post=post)[:10]
+    # comments = Comment.objects.filter(post=post)[:10]
+    comments = post.comments.all()
     form = CommentForm(request.POST or None,
                        instance=comment)
     if not form.is_valid():
@@ -236,22 +229,25 @@ def comment_edit(request, username, post_id, comment_id):
             'post_detail.html',
             {
                 'post': post,
-                'author': author,
+                'author': post_author,
                 'comments': comments,
                 'form': form,
                 'comment': comment
             }
         )
     comment = form.save(commit=False)
+    comment.post = post
+    comment.author = request.user
     comment.save()
     return redirect('post_detail', username=username, post_id=post_id)
 
 
 @login_required
 def comment_delete(request, username, post_id, comment_id):
-    author = get_object_or_404(User, username=request.user)
-    post = get_object_or_404(Post, pk=post_id)
-    comment = get_object_or_404(Comment, pk=comment_id, post=post,
-                                author=author)
+    post_author = get_object_or_404(User, username=username)
+    post = get_object_or_404(Post, pk=post_id, author=post_author)
+    comment = get_object_or_404(Comment, pk=comment_id, post=post)
+    if request.user != comment.author:
+        return redirect('post_detail', username=username, post_id=post_id)
     comment.delete()
     return redirect('post_detail', username=username, post_id=post_id)
