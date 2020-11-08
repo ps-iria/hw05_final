@@ -401,7 +401,6 @@ class ModelsTest(TestCase):
             'Комментарий добавился в базу')
         self.assertRedirects(
             response,
-            # f'/auth/login/?next={self.COMMENT}',
             '%s?next=%s' % (self.LOGIN, self.COMMENT),
             msg_prefix='Анонимный пользователь не перенаправлен '
                        'на страницу логина')

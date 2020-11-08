@@ -158,7 +158,7 @@ def add_comment(request, username, post_id):
     if not form.is_valid():
         return render(
             request,
-            'posts/../templates/includes/comments.html',
+            'includes/comments.html',
             {
                 'form': form,
                 'post': post_object
@@ -219,7 +219,6 @@ def comment_edit(request, username, post_id, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id, post=post)
     if request.user != comment.author:
         return redirect('post_detail', username=username, post_id=post_id)
-    # comments = Comment.objects.filter(post=post)[:10]
     comments = post.comments.all()
     form = CommentForm(request.POST or None,
                        instance=comment)
