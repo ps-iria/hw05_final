@@ -7,7 +7,7 @@
     <div class="col-md-12">
       {% include "includes/menu.html" with index=True %}
       {% for post in page %}
-        {% include "posts/../../../templates/includes/post_item.html" with post=post %}
+        {% include "includes/post_item.html" with post=post %}
       {% endfor %}
       {% if page.has_other_pages %}
         {% include 'includes/pagination.html' %}

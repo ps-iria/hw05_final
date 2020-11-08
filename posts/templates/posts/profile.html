@@ -6,7 +6,7 @@
     {% load thumbnail %}
   <main role="main" class="container">
   <div class="row">
-  {% include 'posts/../../../templates/includes/base_profile.html' with author=author %}
+  {% include 'includes/base_profile.html' with author=author %}
     <div class="col-md-9">
       {% if messages %}
         {% for message in messages %}
@@ -14,7 +14,7 @@
         {% endfor %}
       {% endif %}
       {% for post in page %}
-        {% include "posts/../../../templates/includes/post_item.html" with post=post %}
+        {% include "includes/post_item.html" with post=post %}
       {% endfor %}
     </div>
   </div>
