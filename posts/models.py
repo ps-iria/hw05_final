@@ -49,7 +49,8 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='posts/',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Изображение',
     )
 
     class Meta:
@@ -63,12 +64,13 @@ class Comment(models.Model):
         Post,
         related_name='comments',
         on_delete=models.CASCADE,
-
+        verbose_name='Запись',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
+        verbose_name='Автор',
     )
     text = models.TextField(
         verbose_name='Комментарий',
@@ -80,19 +82,32 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('-created',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
 
 class Follow(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="follower"
+        related_name="follower",
+        verbose_name='Пользователь',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="following"
+        related_name="following",
+        verbose_name='Автор',
     )
 
     class Meta:
-        unique_together = (("user", "author"),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    'user',
+                    'author'
+                ],
+                name='unique_item')
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
