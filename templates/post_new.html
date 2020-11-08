@@ -8,22 +8,24 @@
     <div class="col-md-12 p-3">
       <div class="card">
         <div class="card-body">
-          <form method="post" enctype="multipart/form-data" action="{% if post %}{% url 'post_edit' user.username post.pk %}{% else %}{% url 'post_new' %}{% endif %}">
+          <form method="post"
+                enctype="multipart/form-data"
+                action="{% if post %}{% url 'post_edit' user.username post.pk %}{% else %}{% url 'post_new' %}{% endif %}">
             {% csrf_token %}
-              {% for field in form %}
-                <div class="form-group row" aria-required="{% if field.field.required %}true{% else %}false{% endif %}">
-                  <label for="{{ field.id_for_label }}" class="col-md-4 col-form-label text-md-right">{{ field.label }}</label>
-                  <div class="col-md-6">
-                    {{ field|addclass:"form-control" }}
-                    {% if field.help_text %}
-                      <small id="{{ field.id_for_label }}-help" class="form-text text-muted">{{ field.help_text|safe }}</small>
-                    {% endif %}
-                  </div>
+            {% for field in form %}
+              <div class="form-group row" aria-required="{% if field.field.required %}true{% else %}false{% endif %}">
+                <label for="{{ field.id_for_label }}" class="col-md-4 col-form-label text-md-right">{{ field.label }}</label>
+                <div class="col-md-6">
+                  {{ field|addclass:"form-control" }}
+                  {% if field.help_text %}
+                    <small id="{{ field.id_for_label }}-help" class="form-text text-muted">{{ field.help_text|safe }}</small>
+                  {% endif %}
                 </div>
-                {% for error in field.errors %}
-                  <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                  </div>
+              </div>
+              {% for error in field.errors %}
+                <div class="alert alert-danger" role="alert">
+                  {{ error }}
+                </div>
               {% endfor %}
             {% endfor %}
             <div class="col-md-6 offset-md-4">

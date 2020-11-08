@@ -4,11 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>{% block title %}News blog{% endblock %} | Yatube</title>
+  <title>{% block title %}Programmers blog{% endblock %} | Yatube</title>
   <!-- Загрузка статики -->
   {% load static %}
   <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap3.4.0.min.css' %}">
   <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
   <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
 </head>
@@ -17,9 +17,9 @@
   <main>
     <div class="container">
       {% include 'nav.html' %}
-        <h1>{% block header %}The Last Social Media You'll Ever Need{% endblock %}</h1>
-        {% block content %}
-        {% endblock %}
+      <h1>{% block header %}The Last Social Media You'll Ever Need{% endblock %}</h1>
+      {% block content %}
+      {% endblock %}
       {% include 'footer.html' %}
     </div>
   </main>

@@ -29,18 +29,18 @@
           </a>
           {{ item.created }}
         </h5>
-        {{ item.text }}
+        {{ item.text|linebreaksbr }}
       </div>
       {% if item.author == user %}
-      <div class="text-right">
-        <a href="{% url 'comment_edit' post.author.username post.id item.id %}"
-           name="comment_{{ item.id }}">редактировать
-        </a>
-        <br>
-        <a href="{% url 'comment_delete' post.author.username post.id item.id %}"
-           name="comment_{{ item.id }}">Удалить
-        </a>
-      </div>
+        <div class="text-right">
+          <a href="{% url 'comment_edit' post.author.username post.id item.id %}"
+             name="comment_{{ item.id }}">редактировать
+          </a>
+          <br>
+          <a href="{% url 'comment_delete' post.author.username post.id item.id %}"
+             name="comment_{{ item.id }}">Удалить
+          </a>
+        </div>
       {% endif %}
     </div>
     <hr>

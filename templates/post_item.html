@@ -1,7 +1,7 @@
 <div class="card mb-3 mt-1 shadow-sm">
   {% load thumbnail %}
   {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
-  <img class="card-img" src="{{ im.url }}" />
+    <img class="card-img" src="{{ im.url }}" />
   {% endthumbnail %}
   <div class="card-body">
     <p class="card-text">
@@ -10,7 +10,7 @@
       </a>
       {{ post.text|linebreaksbr }}
     </p>
-    {% if post.group %}
+    {% if post.group and not group %}
       <a class="card-link muted" href="{% url 'group' post.group.slug %}">
         <strong class="d-block text-gray-dark">#{{ post.group.title }}</strong>
       </a>
@@ -18,11 +18,11 @@
 
     <div class="d-flex justify-content-between align-items-center">
       <div class="btn-group">
-        {% if post.comments.exists %}
+{#        {% if post.comments.count %}#}
           <div>
             Комментариев: {{ post.comments.count }}
           </div>
-        {% endif %}
+{#        {% endif %}#}
         <a class="btn btn-sm btn-primary" href="{% url 'post_detail' post.author.username post.id %}" role="button">
           Добавить комментарий
         </a>
