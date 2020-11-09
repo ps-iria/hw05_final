@@ -276,10 +276,9 @@ class ModelsTest(TestCase):
                 'image': self.file
             }
         )
-        self.assertContains(
-            response,
-            'Загрузите правильное изображение. Файл, который вы загрузили, '
-            'поврежден или не является изображением.',
+        self.assertFalse(
+            response.context['form'].is_valid(),
+            msg='Форма с файлом, не изображением, прошла валидацию'
         )
 
     def test_image_in_post(self):
@@ -287,29 +286,19 @@ class ModelsTest(TestCase):
         Тест проверяющий что загруженный файл является изображением
         """
         cache.clear()
-        # self.client.post(
-        #     self.POST_EDIT,
-        #     {
-        #         'author': self.user,
-        #         'text': 'post with image',
-        #         'group': self.group.id,
-        #         'image': self.image
-        #     }
-        # )
-        post = Post.objects.create(
+        Post.objects.create(
             text='post with image',
             author=self.user,
             image=self.image,
             group=self.group
         )
-        for url in self.URLS:
-            with self.subTest(url=url, msg=f'Изображение не найдено'
-                                           f' на странице'):
-                response = self.client.get(url)
-                self.assertContains(
-                    response,
-                    '<img',
-                )
+        with self.subTest(url=self.INDEX, msg=f'Изображение не найдено'
+                                              f' на странице'):
+            response = self.client.get(self.INDEX)
+            self.assertContains(
+                response,
+                '<img',
+            )
 
     def test_cache(self):
         """
@@ -322,9 +311,9 @@ class ModelsTest(TestCase):
             group=self.group,
         )
         response = self.client.get(self.INDEX)
-        self.assertNotContains(
+        self.assertIsNone(
             response.context,
-            post,
+            msg='На странице нет постов'
         )
         cache.clear()
         index = self.client.get(self.INDEX)
@@ -339,29 +328,28 @@ class ModelsTest(TestCase):
         Авторизованный пользователь может подписываться
         на других пользователей.
         """
-        response = self.client.get(self.PROFILE2)
-        self.assertContains(
-            response,
-            self.FOLLOW,
-            msg_prefix='На странице нет кнопки "Подписаться"')
+        self.client.get(
+            self.PROFILE_FOLLOW2,
+            follow=True
+        )
+        self.assertTrue(
+            Follow.objects.filter(user=self.user,
+                                  author=self.user2).exists(),
+            "Запись не добавленна в базу")
 
     def test_unfollow(self):
         """
         Авторизованный пользователь может удалять других пользователей
         из подписок.
         """
-        response = self.client.get(
-            self.PROFILE_FOLLOW2,
+        self.client.get(
+            self.PROFILE_UNFOLLOW2,
             follow=True
         )
-        self.assertContains(
-            response,
-            self.PROFILE_UNFOLLOW2,
-            msg_prefix='На странице нет кнопки "Отписаться"')
-        self.assertTrue(
+        self.assertFalse(
             Follow.objects.filter(user=self.user,
                                   author=self.user2).exists(),
-            "Запись не добавленна в базу")
+            "Запись осталась в базу")
 
     def test_follow_posts(self):
         """
@@ -407,7 +395,7 @@ class ModelsTest(TestCase):
             'Комментарий добавился в базу')
         self.assertRedirects(
             response,
-            '%s?next=%s' % (self.LOGIN, self.COMMENT),
+            f'{self.LOGIN}?next={self.COMMENT}',
             msg_prefix='Анонимный пользователь не перенаправлен '
                        'на страницу логина')
 

@@ -158,7 +158,7 @@ def add_comment(request, username, post_id):
     if not form.is_valid():
         return render(
             request,
-            'includes/comments.html',
+            'posts/includes/comments.html',
             {
                 'form': form,
                 'post': post_object
