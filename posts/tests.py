@@ -287,14 +287,20 @@ class ModelsTest(TestCase):
         Тест проверяющий что загруженный файл является изображением
         """
         cache.clear()
-        self.client.post(
-            self.POST_EDIT,
-            {
-                'author': self.user,
-                'text': 'post with image',
-                'group': self.group.id,
-                'image': self.image
-            }
+        # self.client.post(
+        #     self.POST_EDIT,
+        #     {
+        #         'author': self.user,
+        #         'text': 'post with image',
+        #         'group': self.group.id,
+        #         'image': self.image
+        #     }
+        # )
+        post = Post.objects.create(
+            text='post with image',
+            author=self.user,
+            image=self.image,
+            group=self.group
         )
         for url in self.URLS:
             with self.subTest(url=url, msg=f'Изображение не найдено'
@@ -317,7 +323,7 @@ class ModelsTest(TestCase):
         )
         response = self.client.get(self.INDEX)
         self.assertNotContains(
-            response,
+            response.context,
             post,
         )
         cache.clear()

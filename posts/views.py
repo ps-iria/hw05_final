@@ -192,10 +192,7 @@ def profile_follow(request, username):
     followed_author = get_object_or_404(User, username=username)
     is_follow_exists = Follow.objects.filter(author=followed_author,
                                              user=request.user).exists()
-    if request.user.username == username:
-        messages.warning(request, 'Невозможно подписатся на самого себя.')
-        return redirect('profile', username=username)
-    if not is_follow_exists:
+    if not is_follow_exists and request.user.username != username:
         follow = Follow.objects.create(
             user=request.user,
             author=followed_author
