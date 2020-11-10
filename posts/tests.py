@@ -276,9 +276,12 @@ class ModelsTest(TestCase):
                 'image': self.file
             }
         )
-        self.assertFalse(
-            response.context['form'].is_valid(),
-            msg='Форма с файлом, не изображением, прошла валидацию'
+        self.assertFormError(
+            response,
+            'form',
+            'image',
+            'Загрузите правильное изображение. Файл, который вы загрузили, '
+            'поврежден или не является изображением.'
         )
 
     def test_image_in_post(self):
@@ -304,16 +307,17 @@ class ModelsTest(TestCase):
         """
         Тест, который проверяет работу кэша
         """
-        self.client.get(self.INDEX)
+        response_before = self.client.get(self.INDEX)
         post = Post.objects.create(
             text="new",
             author=self.user,
             group=self.group,
         )
-        response = self.client.get(self.INDEX)
-        self.assertIsNone(
-            response.context,
-            msg='На странице нет постов'
+        response_after = self.client.get(self.INDEX)
+        self.assertEqual(
+            response_before.content,
+            response_after.content,
+            msg='Страница изменилась после добавления поста'
         )
         cache.clear()
         index = self.client.get(self.INDEX)
