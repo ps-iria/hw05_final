@@ -1,16 +1,29 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import InvalidPage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.cache import cache_page
+from django.views.generic import CreateView, UpdateView
 
 from .forms import PostForm, CommentForm
 from .models import Post, Group, Comment, Follow
 
 User = get_user_model()
 
+
+class PostCreate(LoginRequiredMixin, CreateView):
+    model = Post
+    template_name = 'posts/post_new.html'
+    form_class = PostForm
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.author = self.request.user
+        self.object.save()
+        return redirect('post_detail', self.object.author.username, self.object.pk )
 
 @cache_page(20)
 def index(request):
@@ -69,7 +82,7 @@ def post_view(request, username, post_id):
     author = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, pk=post_id, author=author)
     form = CommentForm()
-    comments = Comment.objects.filter(post=post)[:10]
+    comments = Comment.objects.filter(post=post)
     return render(
         request,
         "posts/post_detail.html",
@@ -155,19 +168,11 @@ def add_comment(request, username, post_id):
     post_object = get_object_or_404(Post, id=post_id,
                                     author__username=username)
     form = CommentForm(request.POST or None)
-    if not form.is_valid():
-        return render(
-            request,
-            'posts/includes/comments.html',
-            {
-                'form': form,
-                'post': post_object
-            }
-        )
-    comment = form.save(commit=False)
-    comment.post = post_object
-    comment.author = request.user
-    comment.save()
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post_object
+        comment.author = request.user
+        comment.save()
     return redirect('post_detail', username=username, post_id=post_id)
 
 

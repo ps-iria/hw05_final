@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from .views import PostCreate
 
 urlpatterns = [
     path("",
@@ -9,6 +10,9 @@ urlpatterns = [
     path("new/",
          views.create_post,
          name="post_new"),
+    # path("new/",
+    #      PostCreate.as_view(),
+    #      name="post_new"),
     path("group/<slug:slug>/",
          views.group_posts,
          name="group"),
