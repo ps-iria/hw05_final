@@ -1,21 +1,23 @@
 {% load user_filters %}
 <div class="col col-md-12">
   {% if user.is_authenticated %}
-    <div class="card my-4">
-      <form
-        action="{% if comment %}{% url 'comment_edit' post.author.username post.id comment.id %}{% else %}{% url 'add_comment' post.author.username post.id %}{% endif %}"
-        method="post">
-        {% csrf_token %}
-        <h5 class="card-header">{% if comment %}Сохранить{% else %}Добавить{% endif %} комментарий:</h5>
-        <div class="card-body">
-          <form>
-            <div class="form-group">
-              {{ form.text|addclass:"form-control" }}
-            </div>
-            <button type="submit" class="btn btn-primary">{% if comment %}Сохранить{% else %}Отправить{% endif %}</button>
-          </form>
-        </div>
-      </form>
+    <div class="collapse" id="collapse">
+      <div class="card my-4">
+        <form
+          action="{% if comment %}{% url 'comment_edit' post.author.username post.id comment.id %}{% else %}{% url 'add_comment' post.author.username post.id %}{% endif %}"
+          method="post">
+          {% csrf_token %}
+          <h5 class="card-header">{% if comment %}Сохранить{% else %}Добавить{% endif %} комментарий:</h5>
+          <div class="card-body">
+            <form>
+              <div class="form-group">
+                {{ form.text|addclass:"form-control" }}
+              </div>
+              <button type="submit" class="btn btn-primary">{% if comment %}Сохранить{% else %}Отправить{% endif %}</button>
+            </form>
+          </div>
+        </form>
+      </div>
     </div>
   {% endif %}
 

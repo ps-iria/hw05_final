@@ -1,4 +1,3 @@
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -6,7 +5,7 @@ from django.core.paginator import InvalidPage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.cache import cache_page
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView
 
 from .forms import PostForm, CommentForm
 from .models import Post, Group, Comment, Follow
@@ -23,7 +22,9 @@ class PostCreate(LoginRequiredMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.author = self.request.user
         self.object.save()
-        return redirect('post_detail', self.object.author.username, self.object.pk )
+        return redirect('post_detail', self.object.author.username,
+                        self.object.pk)
+
 
 @cache_page(20)
 def index(request):

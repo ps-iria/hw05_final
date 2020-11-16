@@ -21,9 +21,15 @@
         <div>
           Комментариев: {{ post.comments.count }}
         </div>
-        <a class="btn btn-sm btn-primary" href="{% url 'post_detail' post.author.username post.id %}" role="button">
-          Добавить комментарий
+        {% if not form %}
+          <a class="btn btn-sm btn-primary" href="{% url 'post_detail' post.author.username post.id %}" role="button">
+            Добавить комментарий
+          </a>
+        {% else %}
+          <a class="btn btn-sm btn-primary" data-toggle="collapse" href="#collapse" role="button" aria-expanded="true" aria-controls="collapse">
+         {% if comment %}Сохранить{% else %}Добавить{% endif %} комментарий
         </a>
+        {% endif %}
         {% if user == post.author %}
           <a class="btn btn-sm btn-info" href="{% url 'post_edit' post.author.username post.id %}" role="button">
             Редактировать
